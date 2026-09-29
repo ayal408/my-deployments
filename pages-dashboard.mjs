@@ -104,33 +104,77 @@ const md = [
   "",
 ].join("\n");
 
+const today = new Date().toISOString().slice(0, 10);
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>My Deployments</title>
 <style>
-:root{color-scheme:light dark;--bg:#fff;--fg:#1f2328;--muted:#656d76;--line:#d0d7de;--accent:#0969da}
-@media(prefers-color-scheme:dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--line:#30363d;--accent:#4493f8}}
-body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--fg);max-width:960px;margin:0 auto;padding:24px 16px}
-input{width:100%;padding:8px 12px;font:inherit;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
-.card{border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:12px 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.card h3{margin:0}.muted{color:var(--muted);font-size:14px}a{color:var(--accent)}
-.live{font-weight:600}
+:root{color-scheme:light dark;--bg:#f6f8fc;--card:#fff;--fg:#14171f;--muted:#667085;--line:#e4e8ef;--accent:#6366f1;--accent2:#ec4899;--ok:#12b76a;--okbg:#e6f9f0;--shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06)}
+@media(prefers-color-scheme:dark){:root{--bg:#0b0d14;--card:#141824;--fg:#eef0f6;--muted:#98a2b3;--line:#232a3b;--accent:#818cf8;--ok:#32d583;--okbg:#0f2a1f;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35)}}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--fg)}
+header{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:56px 16px 88px;text-align:center}
+header h1{margin:0 0 8px;font-size:clamp(28px,5vw,44px);letter-spacing:-.02em}
+header p{margin:0;opacity:.9}
+main{max-width:1040px;margin:-56px auto 48px;padding:0 16px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.stat{background:var(--card);border-radius:14px;padding:16px;box-shadow:var(--shadow);text-align:center}
+.stat b{display:block;font-size:28px;line-height:1.1}.stat span{color:var(--muted);font-size:13px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.bar input{flex:1;min-width:200px;padding:11px 16px;font:inherit;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--fg);box-shadow:var(--shadow)}
+.bar input:focus{outline:2px solid var(--accent);border-color:transparent}
+.chip{padding:10px 18px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--fg);font:inherit;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;transition:transform .15s}
+.card:hover{transform:translateY(-3px)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card h3{margin:0;font-size:18px;overflow-wrap:anywhere}
+.card h3 a{color:inherit;text-decoration:none}.card h3 a:hover{color:var(--accent)}
+.badge{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap;background:var(--okbg);color:var(--ok)}
+.badge.off{background:var(--line);color:var(--muted)}
+.desc{color:var(--muted);font-size:14px;flex:1;margin:0}
+.foot{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
+.btn{background:var(--accent);color:#fff;text-decoration:none;padding:7px 14px;border-radius:10px;font-weight:600;font-size:14px}
+.btn:hover{filter:brightness(1.1)}
+.foot a:not(.btn){color:var(--accent);text-decoration:none;font-weight:600}
+.empty{text-align:center;color:var(--muted);padding:32px}
+@media(max-width:520px){.stat b{font-size:22px}}
 </style></head><body>
-<h1>My Deployments</h1>
-<p class="muted">${deployed.length} live of ${rows.length} repos · generated ${new Date().toISOString().slice(0, 10)}</p>
-<input id="q" placeholder="Search…" autofocus>
-<div id="list">
+<header><h1>🚀 My Deployments</h1><p>Every project, one click away · updated ${today}</p></header>
+<main>
+<div class="stats">
+<div class="stat"><b>${rows.length}</b><span>Projects</span></div>
+<div class="stat"><b>${deployed.length}</b><span>Live</span></div>
+<div class="stat"><b>${rows.length - deployed.length}</b><span>Not deployed</span></div>
+</div>
+<div class="bar">
+<input id="q" type="search" placeholder="Search projects…" aria-label="Search projects">
+<button class="chip" data-f="all" aria-pressed="true">All</button>
+<button class="chip" data-f="live" aria-pressed="false">Live only</button>
+</div>
+<div class="grid" id="list">
 ${rows
   .map(
-    (r) => `<div class="card" data-s="${esc((r.name + " " + r.description).toLowerCase())}">
-<div><h3><a href="${esc(r.repo)}">${esc(r.name)}</a>${r.private ? " 🔒" : ""}</h3>
-<div class="muted">${esc(r.description)}</div><div class="muted">Last push ${r.updated}</div></div>
-<div>${r.live ? `<a class="live" href="${esc(r.live)}">Live ↗</a>` : '<span class="muted">not deployed</span>'}</div></div>`,
+    (r) => `<article class="card" data-live="${r.live ? 1 : 0}" data-s="${esc((r.name + " " + r.description).toLowerCase())}">
+<div class="top"><h3><a href="${esc(r.repo)}">${esc(r.name)}</a>${r.private ? " 🔒" : ""}</h3>
+<span class="badge${r.live ? "" : " off"}">${r.live ? "● Live" : "Not deployed"}</span></div>
+<p class="desc">${esc(r.description) || "No description"}</p>
+<div class="foot"><span>Pushed ${r.updated}</span>${r.live ? `<a class="btn" href="${esc(r.live)}">Open ↗</a>` : `<a href="${esc(r.repo)}">Repo</a>`}</div>
+</article>`,
   )
   .join("\n")}
 </div>
+<p class="empty" id="empty" hidden>No projects match.</p>
+</main>
 <script>
-q.oninput=()=>{const v=q.value.toLowerCase();for(const c of list.children)c.hidden=!c.dataset.s.includes(v)}
+let f="all";
+function apply(){const v=q.value.toLowerCase().trim();let n=0;
+for(const c of list.children){const ok=c.dataset.s.includes(v)&&(f==="all"||c.dataset.live==="1");c.hidden=!ok;n+=ok}
+empty.hidden=n>0}
+q.oninput=apply;
+for(const b of document.querySelectorAll(".chip"))b.onclick=()=>{f=b.dataset.f;
+document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===b));apply()};
 </script></body></html>
 `;
 
