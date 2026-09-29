@@ -80,6 +80,8 @@ await Promise.all(
         live: live ?? (r.homepage || null),
         source: live ? "Pages" : r.homepage ? "Homepage" : null,
         description: r.description ?? "",
+        language: r.language ?? "",
+        stars: r.stargazers_count ?? 0,
         updated: r.pushed_at?.slice(0, 10) ?? "",
         private: r.private,
       });
@@ -95,15 +97,17 @@ const md = [
   "",
   `_${deployed.length} live of ${rows.length} repos · generated ${new Date().toISOString().slice(0, 10)}_`,
   "",
-  "| Project | Live | Source | Description | Last push |",
-  "|---|---|---|---|---|",
+  "| Project | Live | Language | ⭐ | Description | Last push |",
+  "|---|---|---|---|---|---|",
   ...rows.map(
     (r) =>
-      `| [${r.name}](${r.repo})${r.private ? " 🔒" : ""} | ${r.live ? `[open](${r.live})` : "—"} | ${r.source ?? ""} | ${r.description.replace(/\|/g, "\\|")} | ${r.updated} |`,
+      `| [${r.name}](${r.repo})${r.private ? " 🔒" : ""} | ${r.live ? `[open](${r.live})` : "—"} | ${r.language} | ${r.stars} | ${r.description.replace(/\|/g, "\\|")} | ${r.updated} |`,
   ),
   "",
 ].join("\n");
 
+const LANG_COLORS = {JavaScript:"#f1e05a",TypeScript:"#3178c6",Python:"#3572A5",HTML:"#e34c26",CSS:"#563d7c",Java:"#b07219",Go:"#00ADD8",Rust:"#dea584","C#":"#178600","C++":"#f34b7d",C:"#555555",PHP:"#4F5D95",Ruby:"#701516",Shell:"#89e051",Vue:"#41b883",Dart:"#00B4AB",Kotlin:"#A97BFF",Swift:"#F05138"};
+const langColor = (l) => LANG_COLORS[l] ?? "#8b949e";
 const today = new Date().toISOString().slice(0, 10);
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -134,6 +138,8 @@ main{max-width:1040px;margin:-56px auto 48px;padding:0 16px}
 .badge{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap;background:var(--okbg);color:var(--ok)}
 .badge.off{background:var(--line);color:var(--muted)}
 .desc{color:var(--muted);font-size:14px;flex:1;margin:0}
+.meta{display:flex;gap:14px;align-items:center;font-size:13px;color:var(--muted)}
+.lang{display:inline-flex;align-items:center;gap:6px}.lang i{width:10px;height:10px;border-radius:50%;display:inline-block}
 .foot{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
 .btn{background:var(--accent);color:#fff;text-decoration:none;padding:7px 14px;border-radius:10px;font-weight:600;font-size:14px}
 .btn:hover{filter:brightness(1.1)}
@@ -160,6 +166,7 @@ ${rows
 <div class="top"><h3><a href="${esc(r.repo)}">${esc(r.name)}</a>${r.private ? " 🔒" : ""}</h3>
 <span class="badge${r.live ? "" : " off"}">${r.live ? "● Live" : "Not deployed"}</span></div>
 <p class="desc">${esc(r.description) || "No description"}</p>
+<div class="meta">${r.language ? `<span class="lang"><i style="background:${langColor(r.language)}"></i>${esc(r.language)}</span>` : ""}<span>⭐ ${r.stars}</span></div>
 <div class="foot"><span>Pushed ${r.updated}</span>${r.live ? `<a class="btn" href="${esc(r.live)}">Open ↗</a>` : `<a href="${esc(r.repo)}">Repo</a>`}</div>
 </article>`,
   )
