@@ -108,10 +108,12 @@ const md = [
 
 const LANG_COLORS = {JavaScript:"#f1e05a",TypeScript:"#3178c6",Python:"#3572A5",HTML:"#e34c26",CSS:"#563d7c",Java:"#b07219",Go:"#00ADD8",Rust:"#dea584","C#":"#178600","C++":"#f34b7d",C:"#555555",PHP:"#4F5D95",Ruby:"#701516",Shell:"#89e051",Vue:"#41b883",Dart:"#00B4AB",Kotlin:"#A97BFF",Swift:"#F05138"};
 const langColor = (l) => LANG_COLORS[l] ?? "#8b949e";
+const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#ec4899"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#g)"/><path d="M32 12c8 6 11 15 9 26l-5 4h-8l-5-4c-2-11 1-20 9-26z" fill="#fff"/><circle cx="32" cy="27" r="4" fill="#6366f1"/><path d="M23 40l-6 8 9-2zM41 40l6 8-9-2z" fill="#fff" opacity=".8"/><path d="M28 46h8l-4 8z" fill="#fde68a"/></svg>`;
 const today = new Date().toISOString().slice(0, 10);
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>My Deployments</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
 :root{color-scheme:light dark;--bg:#f6f8fc;--card:#fff;--fg:#14171f;--muted:#667085;--line:#e4e8ef;--accent:#6366f1;--accent2:#ec4899;--ok:#12b76a;--okbg:#e6f9f0;--shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06)}
 @media(prefers-color-scheme:dark){:root{--bg:#0b0d14;--card:#141824;--fg:#eef0f6;--muted:#98a2b3;--line:#232a3b;--accent:#818cf8;--ok:#32d583;--okbg:#0f2a1f;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35)}}
@@ -188,6 +190,7 @@ document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===
 mkdirSync(outDir, { recursive: true });
 writeFileSync(join(outDir, "deployments.md"), md);
 writeFileSync(join(outDir, "deployments.html"), html);
+writeFileSync(join(outDir, "favicon.svg"), FAVICON);
 
 console.table(deployed.map((r) => ({ name: r.name, live: r.live })));
 console.log(`\nWrote ${join(outDir, "deployments.md")} and ${join(outDir, "deployments.html")}`);
